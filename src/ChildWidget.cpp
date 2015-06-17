@@ -583,6 +583,30 @@ bool ChildWidget::loadImage(const QString& fileName) {
   return true;
 }
 
+bool ChildWidget::loadBoxFile(const QString& fileName) {
+   if (boxesVisible) {
+    drawBoxes();
+  }
+  deleteModelItemBox(table->currentIndex().row());
+  bool showFontColumns = isFontColumnsShown();
+  model->clear();
+  delete selectionModel;
+  delete model;
+  pages.clear();
+  initTable();
+  setShowFontColumns(showFontColumns);
+  
+  loadBoxes(fileName);
+  setCurrentBoxFile(fileName);
+  setFileWatcher(fileName);
+
+  updateSelectionRects();
+
+  modified = false;
+  emit modifiedChanged();
+  return true;
+}
+
 bool ChildWidget::qCreateBoxes(const QString &boxFileName) {
   if (DMESS > 10) qDebug() << Q_FUNC_INFO;
   loadTable();
@@ -639,28 +663,22 @@ bool ChildWidget::readToVector(QTextStream &boxdata) {
   for (int i = 0; i < lineBoxes.size(); ++i) {
     QString line = lineBoxes.at(i);
     QStringList box = line.split(" ");
-    if (box.size() == 7) {
-        if (line.startsWith(" "))
-            box.removeFirst ();  // tess2image generate also box for spaces
-    } else if (box.size() != 6) {
-      qDebug() << "box:" << box;
-      QMessageBox::warning(this, SETTING_APPLICATION,
-                           tr("File can not be loaded because of wrong "
-                              "(non tesseract-ocr 3.02) box "
-                              "file format at line '%1'! (box.size: %2)")
-                              .arg(i + 1).arg (box.size()));
-      QApplication::restoreOverrideCursor();
-      return false;
-    }
+    QStringList box2;
 
-    if (box[5] == pagePrev) {
-      page.append(box);
-    } else {
-      pagePrev = box[5];
-      pages.append(page);
-      page.clear();
-      page.append(box);
+    int i = 0;
+    QStringList::const_iterator it = box.end();
+    while(it != box.begin())
+    {
+      --it;
+      if(i < 6)
+        box2.prepend(*it);
+      if(i >= 6)
+      {
+        box2.front() = *it + " " + box2.front();
+      }
+      i++;
     }
+    page.append(box2);
   }
   pages.append(page);
   return true;

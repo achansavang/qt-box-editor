@@ -211,6 +211,27 @@ void MainWindow::saveAs() {
     statusBar()->showMessage(tr("File saved"), 2000);
 }
 
+void MainWindow::loadBoxfile() {
+  QSettings settings(QSettings::IniFormat, QSettings::UserScope,
+                     SETTING_ORGANIZATION, SETTING_APPLICATION);
+  // try to get path from settings
+  QString last_path = settings.value("last_path").toString();
+  QString filetype = "Box files (*.box);;";
+
+  QString boxFile = QFileDialog::getOpenFileName(
+                        this,
+                        tr("Select box file..."),
+                        last_path,
+                        filetype);
+
+  if (boxFile.isEmpty())
+    return;
+
+  if (activeChild() && activeChild()->loadBoxFile(boxFile))
+    statusBar()->showMessage(tr("Box file loaded"), 2000);
+  // addChild(imageFile);
+}
+
 void MainWindow::reLoad() {
   QString currentFileName = activeChild()->currentBoxFile();
   if (QFile::exists(currentFileName)) {
@@ -802,6 +823,12 @@ void MainWindow::createActions() {
   saveAsAct->setEnabled(false);
   connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
 
+  openBoxfileAct = new QAction(tr("Open boxfile"), this);
+  openBoxfileAct->setToolTip(tr("Load a box file"));
+  openBoxfileAct->setStatusTip(tr("Load a box file"));
+  openBoxfileAct->setEnabled(true);
+  connect(openBoxfileAct, SIGNAL(triggered()), this, SLOT(loadBoxfile()));
+
   reLoadAct = new QAction(tr("Reload boxfile"), this);
   reLoadAct->setShortcut(tr("Ctrl+Alt+R"));
   reLoadAct->setToolTip(tr("Reload file from disk."));
@@ -1086,6 +1113,7 @@ void MainWindow::createMenus() {
   fileMenu->addAction(openAct);
   fileMenu->addAction(saveAct);
   fileMenu->addAction(saveAsAct);
+  fileMenu->addAction(openBoxfileAct);
   fileMenu->addAction(reLoadAct);
   fileMenu->addAction(reLoadImgAct);
   fileMenu->addSeparator();

@@ -179,6 +179,7 @@ class ChildWidget : public QSplitter {
     bool importTextToChild(const QString& fileName);
     bool exportTxt(const int& eType, const QString& fileName);
     bool loadImage(const QString& fileName);
+    bool loadBoxFile(const QString& fileName);
     bool loadBoxes(const QString& fileName);
     bool qCreateBoxes(const QString &boxFileName);
     bool makeBoxPage();

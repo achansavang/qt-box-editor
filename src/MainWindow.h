@@ -87,6 +87,7 @@ class MainWindow : public QMainWindow {
     void saveAs();
     void genBoxFile();
     void getBinImage();
+    void loadBoxfile();
     void reLoad();
     void reLoadImg();
     void importPLSym();
@@ -173,6 +174,7 @@ class MainWindow : public QMainWindow {
     QAction* saveAct;
     QAction* splitToFeatureBFAct;
     QAction* saveAsAct;
+    QAction* openBoxfileAct;
     QAction* reLoadAct;
     QAction* reLoadImgAct;
     QAction* importPLSymAct;
