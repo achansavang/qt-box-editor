@@ -665,18 +665,18 @@ bool ChildWidget::readToVector(QTextStream &boxdata) {
     QStringList box = line.split(" ");
     QStringList box2;
 
-    int i = 0;
+    int j = 0;
     QStringList::const_iterator it = box.end();
     while(it != box.begin())
     {
       --it;
-      if(i < 6)
+      if(j < 6)
         box2.prepend(*it);
-      if(i >= 6)
+      if(j >= 6)
       {
         box2.front() = *it + " " + box2.front();
       }
-      i++;
+      j++;
     }
     page.append(box2);
   }
