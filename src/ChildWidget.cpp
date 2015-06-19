@@ -198,7 +198,7 @@ bool DragResizer::sceneEventFilter(QGraphicsItem* watched, QEvent* event) {
 ////////////////////////////////////////////////////////////////////////////////
 
 ChildWidget::ChildWidget(QWidget* parent)
-  : QSplitter(Qt::Horizontal, parent) {
+  : QSplitter(Qt::Horizontal, parent), drawingRectangle(false) {
   if (DMESS > 10) qDebug() << Q_FUNC_INFO;
   table = new QTableView;
   table->resize(1, 1);
@@ -304,14 +304,14 @@ ChildWidget::ChildWidget(QWidget* parent)
   gridLayout->addItem(horizontalSpacer, 0, 1, 1, 1);
   gridLayout->addLayout(actionLayout, 0, 2, 1, 1);
 
-  QWidget* tableWidget = new QWidget(this);
+  tableWidget = new QWidget(this);
   QVBoxLayout* verticalLayout = new QVBoxLayout(tableWidget);
   verticalLayout->setContentsMargins(0, 0, 0, 0);
   verticalLayout->addWidget(table);
   verticalLayout->addLayout(gridLayout);
 
   // Image part of display
-  QWidget* imageWidget = new QWidget(this);
+  imageWidget = new QWidget(this);
   QVBoxLayout* imageLayout = new QVBoxLayout(imageWidget);
   imageLayout->setContentsMargins(0, 0, 0, 2);
   imageLayout->addWidget(imageView);
@@ -1618,80 +1618,81 @@ void ChildWidget::showSymbol() {
 
 void ChildWidget::drawRectangle(bool checked) {
   if (DMESS > 10) qDebug() << Q_FUNC_INFO;
-  if (checked) {
-    if (!m_DrawRectangle) {
-      m_DrawRectangle = new DrawRectangle(this, userFriendlyCurrentFile(),
-                                          imageWidth, imageHeight);
-    }
-    int ret = m_DrawRectangle->exec();
-    QRect newCoords = m_DrawRectangle->getRectangle();
-    int x1, y1, x2, y2;
-    newCoords.getCoords(&x1, &y1, &x2, &y2);
-    const bool rectNotSet(x1 == 0 && y1 == 0 && x2 == 0 && y2 == 0);
+  drawingRectangle = !drawingRectangle;
+  // if (checked) {
+  //   if (!m_DrawRectangle) {
+  //     m_DrawRectangle = new DrawRectangle(this, userFriendlyCurrentFile(),
+  //                                         imageWidth, imageHeight);
+  //   }
+  //   int ret = m_DrawRectangle->exec();
+  //   QRect newCoords = m_DrawRectangle->getRectangle();
+  //   int x1, y1, x2, y2;
+  //   newCoords.getCoords(&x1, &y1, &x2, &y2);
+  //   const bool rectNotSet(x1 == 0 && y1 == 0 && x2 == 0 && y2 == 0);
 
-    if (ret && !rectNotSet) {
-      if (rectangle) {
-        qDebug() << "Something went wrong. Object rectangle should not exist!";
-      }
+  //   if (ret && !rectNotSet) {
+  //     if (rectangle) {
+  //       qDebug() << "Something went wrong. Object rectangle should not exist!";
+  //     }
 
-      const QPen redPen(QColor(255, 0, 0, 255));
+  //     const QPen redPen(QColor(255, 0, 0, 255));
 
-      rectangle = imageScene->addRect(newCoords.x(), newCoords.y(),
-                                      newCoords.width(), newCoords.height(),
-                                      redPen,
-                                      QBrush(QColor(255, 0, 0, 100)));
-      rectangle->setZValue(1);
-      rectangle->setVisible(true);
+  //     rectangle = imageScene->addRect(newCoords.x(), newCoords.y(),
+  //                                     newCoords.width(), newCoords.height(),
+  //                                     redPen,
+  //                                     QBrush(QColor(255, 0, 0, 100)));
+  //     rectangle->setZValue(1);
+  //     rectangle->setVisible(true);
 
-      vertLineLeft = imageScene->addLine(newCoords.x(), 0,
-                                         newCoords.x(), imageScene->height(), redPen);
-      vertLineLeft->setZValue(1);
-      vertLineLeft->setVisible(true);
+  //     vertLineLeft = imageScene->addLine(newCoords.x(), 0,
+  //                                        newCoords.x(), imageScene->height(), redPen);
+  //     vertLineLeft->setZValue(1);
+  //     vertLineLeft->setVisible(true);
 
-      vertLineRight = imageScene->addLine(newCoords.bottomRight().x(), 0,
-                                          newCoords.bottomRight().x(), imageScene->height(), redPen);
-      vertLineRight->setZValue(1);
-      vertLineRight->setVisible(true);
+  //     vertLineRight = imageScene->addLine(newCoords.bottomRight().x(), 0,
+  //                                         newCoords.bottomRight().x(), imageScene->height(), redPen);
+  //     vertLineRight->setZValue(1);
+  //     vertLineRight->setVisible(true);
 
-      horLineTop = imageScene->addLine(0, newCoords.y(),
-                                       imageScene->width(), newCoords.y(), redPen);
-      horLineTop->setZValue(1);
-      horLineTop->setVisible(true);
+  //     horLineTop = imageScene->addLine(0, newCoords.y(),
+  //                                      imageScene->width(), newCoords.y(), redPen);
+  //     horLineTop->setZValue(1);
+  //     horLineTop->setVisible(true);
 
-      horLineBottom = imageScene->addLine(0, newCoords.bottomRight().y(),
-                                          imageScene->width(), newCoords.bottomRight().y(), redPen);
-      horLineBottom->setZValue(1);
-      horLineBottom->setVisible(true);
+  //     horLineBottom = imageScene->addLine(0, newCoords.bottomRight().y(),
+  //                                         imageScene->width(), newCoords.bottomRight().y(), redPen);
+  //     horLineBottom->setZValue(1);
+  //     horLineBottom->setVisible(true);
 
-      drawnRectangle = true;
-    }
-  } else {
-    if (rectangle) {
-      // I can not call rectangle->prepareGeometryChange();
-      // http://www.qtcentre.org/threads/28749-Qt-4.6-GraphicsView-items-remove-problem
-      imageScene->removeItem(rectangle);
-      delete rectangle;
+  //     drawnRectangle = true;
+  //   }
+  // } else {
+  //   if (rectangle) {
+  //     // I can not call rectangle->prepareGeometryChange();
+  //     // http://www.qtcentre.org/threads/28749-Qt-4.6-GraphicsView-items-remove-problem
+  //     imageScene->removeItem(rectangle);
+  //     delete rectangle;
 
-      imageScene->removeItem(vertLineLeft);
-      delete vertLineLeft;
+  //     imageScene->removeItem(vertLineLeft);
+  //     delete vertLineLeft;
 
-      imageScene->removeItem(vertLineRight);
-      delete vertLineRight;
+  //     imageScene->removeItem(vertLineRight);
+  //     delete vertLineRight;
 
-      imageScene->removeItem(horLineTop);
-      delete horLineTop;
+  //     imageScene->removeItem(horLineTop);
+  //     delete horLineTop;
 
-      imageScene->removeItem(horLineBottom);
-      delete horLineBottom;
+  //     imageScene->removeItem(horLineBottom);
+  //     delete horLineBottom;
 
-      // Workaround
-      QRectF isCoords = imageScene->sceneRect();
-      imageScene->update(isCoords);
+  //     // Workaround
+  //     QRectF isCoords = imageScene->sceneRect();
+  //     imageScene->update(isCoords);
 
-      drawnRectangle = false;
-    }
-  }
-  emit drawRectangleChoosen();
+  //     drawnRectangle = false;
+  //   }
+  // }
+  // emit drawRectangleChoosen();
 }
 
 QGraphicsRectItem* ChildWidget::modelItemBox(int row) {
@@ -1759,7 +1760,7 @@ void ChildWidget::mousePressEvent(QMouseEvent* event) {
 
   // zoom should be proportional => m11=m22
   qreal zoomFactor = imageView->transform().m22();
-  int offset = this->sizes().first() + 6;  // 6 is estimated width  of splitter
+  int offset = this->sizes().first() + 3;  // 6 is estimated width  of splitter
   int zoomedOffset = offset / zoomFactor;
 
   // Rubber band
@@ -1771,20 +1772,34 @@ void ChildWidget::mousePressEvent(QMouseEvent* event) {
     rubberBand->show();
     grabMouse();
   } else if (event->modifiers() == Qt::NoModifier) {  // BB click selection
-    for (int row = 0; row < model->rowCount(); ++row) {
-      int left = model->index(row, 1).data().toInt();
-      int bottom = model->index(row, 2).data().toInt();
-      int right = model->index(row, 3).data().toInt();
-      int top = model->index(row, 4).data().toInt();
-      QPointF mouseCoordinates = imageView->mapToScene(event->pos());
-      if ((left <= (mouseCoordinates.x() - zoomedOffset) &&
-           (mouseCoordinates.x() - zoomedOffset) <= right) &&
-          (top <= mouseCoordinates.y()) &&
-          (mouseCoordinates.y() <= bottom)) {
-        table->setCurrentIndex(model->index(row, 0));
-        table->setFocus();
+
+    if(drawingRectangle)
+    {
+      // drawStartPos = event->pos();
+      rbOrigin = imageView->mapFromParent(event->pos());
+      rbOrigin.setX(rbOrigin.x() - offset);
+      rubberBand->setGeometry(QRect(rbOrigin, QSize()));
+      rubberBand->show();
+      grabMouse();
+    }
+    else
+    {
+      for (int row = 0; row < model->rowCount(); ++row) {
+        int left = model->index(row, 1).data().toInt();
+        int bottom = model->index(row, 2).data().toInt();
+        int right = model->index(row, 3).data().toInt();
+        int top = model->index(row, 4).data().toInt();
+        QPointF mouseCoordinates = imageView->mapToScene(event->pos());
+        if ((left <= (mouseCoordinates.x() - zoomedOffset) &&
+             (mouseCoordinates.x() - zoomedOffset) <= right) &&
+            (top <= mouseCoordinates.y()) &&
+            (mouseCoordinates.y() <= bottom)) {
+          table->setCurrentIndex(model->index(row, 0));
+          table->setFocus();
+        }
       }
     }
+
   }  // else (BB selection)
 }
 
@@ -1812,59 +1827,123 @@ void ChildWidget::mouseMoveEvent(QMouseEvent* event) {
   rubberBand->setGeometry(QRect(topleft, botright));
 }
 
-void ChildWidget::mouseReleaseEvent(QMouseEvent* /*event*/) {
+void ChildWidget::mouseReleaseEvent(QMouseEvent* event) {
   if (DMESS > 10) qDebug() << Q_FUNC_INFO;
   setCursor(Qt::ArrowCursor);
   releaseMouse();
   rubberBand->hide();
 
-  // If a Ctrl+Click - toggle
-  if (!rubberBand->size().isValid() || (rubberBand->size().width() == 0 &&
-                                        rubberBand->size().height() == 0)) {
-    QPoint pos = imageView->mapToScene(rubberBand->pos()).toPoint();
-    for (int row = 0; row < model->rowCount(); ++row) {
-      int left = model->index(row, 1).data().toInt();
-      int bottom = model->index(row, 2).data().toInt();
-      int right = model->index(row, 3).data().toInt();
-      int top = model->index(row, 4).data().toInt();
+  if(drawingRectangle)
+  {
 
-      if (left <= pos.x() && pos.x() <= right &&
-              top <= pos.y() && pos.y() <= bottom) {
-        table->selectionModel()->select(model->index(row, 0),
-                                        QItemSelectionModel::Toggle |
-                                        QItemSelectionModel::Rows);
-        break;
-      }
-    }  // for row
-  // end of if click
-  } else {  // If rubber band - add to selection
-    QRect rect(rubberBand->pos(), rubberBand->size());
-    QPoint topleft = imageView->mapToScene(rect.topLeft()).toPoint();
-    QPoint botright = imageView->mapToScene(rect.bottomRight()).toPoint();
-    QItemSelection selection;
-    for (int row = 0; row < model->rowCount(); ++row) {
-      int cx = (model->index(row, 1).data().toInt() +
-                model->index(row, 3).data().toInt())/2;
-      int cy = (model->index(row, 2).data().toInt() +
-                model->index(row, 4).data().toInt())/2;
+    if (rubberBand->size().isValid() && (rubberBand->size().width() != 0 &&
+                                          rubberBand->size().height() != 0)) {
 
-      if (cx >= topleft.x() && cx <= botright.x() && cy >= topleft.y() &&
-              cy <= botright.y())
-        selection.push_back(QItemSelectionRange(model->index(row, 0)));
+      qreal zoomFactor = imageView->transform().m22();
+      int offset = this->sizes().first() + 3;  // 6 is estimated width  of splitter
+      int offset2 = imageWidget->size().width() > imageItem->boundingRect().size().toSize().width() ? (imageWidget->size().width() - imageItem->boundingRect().size().toSize().width()) / 2 : 0;
+      int offsety = imageWidget->size().height() > imageItem->boundingRect().size().toSize().height() ? (imageWidget->size().height() - imageItem->boundingRect().size().toSize().height()) / 2 : 0;
+
+      rbOrigin.setX(rbOrigin.x() + offset);
+
+      offset /= zoomFactor;
+      offset2 /= zoomFactor;
+      offsety /= zoomFactor;
+
+      QPoint pos = imageView->mapFromParent(event->pos());
+
+      pos.setX(pos.x() - offset - offset2);
+      rbOrigin.setX(rbOrigin.x() - offset - offset2);
+      pos.setY(pos.y() - offsety);
+      rbOrigin.setY(rbOrigin.y() - offsety);
+   
+      int left = std::min(pos.x(), rbOrigin.x()) / zoomFactor;
+      int right = std::max(pos.x(), rbOrigin.x()) / zoomFactor;
+      int bottom = std::max(pos.y(), rbOrigin.y()) / zoomFactor;
+      int top = std::min(pos.y(), rbOrigin.y()) / zoomFactor;
+
+      int newrow = 0;
+      model->insertRow(newrow);
+      model->setData(model->index(newrow, 0), "*");
+      model->setData(model->index(newrow, 1), left);
+      model->setData(model->index(newrow, 2), bottom);
+      model->setData(model->index(newrow, 3), right);
+      model->setData(model->index(newrow, 4), top);
+      model->setData(model->index(newrow, 5), 0);
+      model->setData(model->index(newrow, 6), false);
+      model->setData(model->index(newrow, 7), false);
+      model->setData(model->index(newrow, 8), false);
+
+      UndoItem ui;
+      ui.m_eop = euoAdd;
+      ui.m_origrow = newrow;
+
+      // For redo
+      for (int ii = 0; ii < model->columnCount(); ii++)
+        ui.m_vdata[ii] = model->index(ui.m_origrow, ii).data();
+
+      m_undostack.push(ui);
+
+      QGraphicsRectItem* rectItem = createModelItemBox(newrow);
+      if (boxesVisible)
+        rectItem->show();
+      table->setCurrentIndex(model->index(newrow, 0));
+      table->setFocus();
+
+      updateSelectionRects();
+      emit modifiedChanged();
     }
-    table->selectionModel()->select(selection, QItemSelectionModel::Select |
-                                    QItemSelectionModel::Rows);
-  }   // if rubber band
+  }
+  else
+  {
+    // If a Ctrl+Click - toggle
+    if (!rubberBand->size().isValid() || (rubberBand->size().width() == 0 &&
+                                          rubberBand->size().height() == 0)) {
+      QPoint pos = imageView->mapToScene(rubberBand->pos()).toPoint();
+      for (int row = 0; row < model->rowCount(); ++row) {
+        int left = model->index(row, 1).data().toInt();
+        int bottom = model->index(row, 2).data().toInt();
+        int right = model->index(row, 3).data().toInt();
+        int top = model->index(row, 4).data().toInt();
 
-  table->setFocus();
-  updateSelectionRects();
+        if (left <= pos.x() && pos.x() <= right &&
+                top <= pos.y() && pos.y() <= bottom) {
+          table->selectionModel()->select(model->index(row, 0),
+                                          QItemSelectionModel::Toggle |
+                                          QItemSelectionModel::Rows);
+          break;
+        }
+      }  // for row
+    // end of if click
+    } else {  // If rubber band - add to selection
+      QRect rect(rubberBand->pos(), rubberBand->size());
+      QPoint topleft = imageView->mapToScene(rect.topLeft()).toPoint();
+      QPoint botright = imageView->mapToScene(rect.bottomRight()).toPoint();
+      QItemSelection selection;
+      for (int row = 0; row < model->rowCount(); ++row) {
+        int cx = (model->index(row, 1).data().toInt() +
+                  model->index(row, 3).data().toInt())/2;
+        int cy = (model->index(row, 2).data().toInt() +
+                  model->index(row, 4).data().toInt())/2;
 
-  // Focus the last symbol in the selection
-  if (!table->selectionModel()->hasSelection() &&
-      table->selectionModel()->selection().size() > 0)
-    table->selectionModel()->setCurrentIndex(
-      table->selectionModel()->selectedRows().last(),
-      QItemSelectionModel::NoUpdate);
+        if (cx >= topleft.x() && cx <= botright.x() && cy >= topleft.y() &&
+                cy <= botright.y())
+          selection.push_back(QItemSelectionRange(model->index(row, 0)));
+      }
+      table->selectionModel()->select(selection, QItemSelectionModel::Select |
+                                      QItemSelectionModel::Rows);
+    }   // if rubber band
+
+    table->setFocus();
+    updateSelectionRects();
+
+    // Focus the last symbol in the selection
+    if (!table->selectionModel()->hasSelection() &&
+        table->selectionModel()->selection().size() > 0)
+      table->selectionModel()->setCurrentIndex(
+        table->selectionModel()->selectedRows().last(),
+        QItemSelectionModel::NoUpdate);
+  }
 }
 
 bool ChildWidget::eventFilter(QObject* object, QEvent* event) {

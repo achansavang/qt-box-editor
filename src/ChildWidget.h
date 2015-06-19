@@ -321,6 +321,8 @@ class ChildWidget : public QSplitter {
     QGraphicsScene* imageScene;
     QGraphicsView* imageView;
     QWidget* pageWidget;
+    QWidget* tableWidget;
+    QWidget* imageWidget;
     QGraphicsItem* imageItem;
     QGraphicsRectItem* rectangle;
     QGraphicsLineItem* vertLineLeft;
@@ -388,6 +390,8 @@ class ChildWidget : public QSplitter {
     QStack<UndoItem> m_redostack;
     bool bIsSpinBoxChanged;
     bool bIsLineEditChanged;
+
+    bool drawingRectangle;
 };
 
 #endif  // SRC_CHILDWIDGET_H_
