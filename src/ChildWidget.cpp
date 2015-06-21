@@ -346,7 +346,7 @@ ChildWidget::ChildWidget(QWidget* parent)
   modified = false;
   boxesVisible = false;
   drawnRectangle = false;
-  symbolShown = true;
+  symbolShown = false;
   directTypingMode = false;
   f_dialog = 0;
   m_DrawRectangle = 0;
