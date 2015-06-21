@@ -198,7 +198,7 @@ bool DragResizer::sceneEventFilter(QGraphicsItem* watched, QEvent* event) {
 ////////////////////////////////////////////////////////////////////////////////
 
 ChildWidget::ChildWidget(QWidget* parent)
-  : QSplitter(Qt::Horizontal, parent), drawingRectangle(false) {
+  : QSplitter(Qt::Horizontal, parent), drawingRectangle(false), multipleSelection(false) {
   if (DMESS > 10) qDebug() << Q_FUNC_INFO;
   table = new QTableView;
   table->resize(1, 1);
@@ -1618,81 +1618,80 @@ void ChildWidget::showSymbol() {
 
 void ChildWidget::drawRectangle(bool checked) {
   if (DMESS > 10) qDebug() << Q_FUNC_INFO;
-  drawingRectangle = !drawingRectangle;
-  // if (checked) {
-  //   if (!m_DrawRectangle) {
-  //     m_DrawRectangle = new DrawRectangle(this, userFriendlyCurrentFile(),
-  //                                         imageWidth, imageHeight);
-  //   }
-  //   int ret = m_DrawRectangle->exec();
-  //   QRect newCoords = m_DrawRectangle->getRectangle();
-  //   int x1, y1, x2, y2;
-  //   newCoords.getCoords(&x1, &y1, &x2, &y2);
-  //   const bool rectNotSet(x1 == 0 && y1 == 0 && x2 == 0 && y2 == 0);
+  if (checked) {
+    if (!m_DrawRectangle) {
+      m_DrawRectangle = new DrawRectangle(this, userFriendlyCurrentFile(),
+                                          imageWidth, imageHeight);
+    }
+    int ret = m_DrawRectangle->exec();
+    QRect newCoords = m_DrawRectangle->getRectangle();
+    int x1, y1, x2, y2;
+    newCoords.getCoords(&x1, &y1, &x2, &y2);
+    const bool rectNotSet(x1 == 0 && y1 == 0 && x2 == 0 && y2 == 0);
 
-  //   if (ret && !rectNotSet) {
-  //     if (rectangle) {
-  //       qDebug() << "Something went wrong. Object rectangle should not exist!";
-  //     }
+    if (ret && !rectNotSet) {
+      if (rectangle) {
+        qDebug() << "Something went wrong. Object rectangle should not exist!";
+      }
 
-  //     const QPen redPen(QColor(255, 0, 0, 255));
+      const QPen redPen(QColor(255, 0, 0, 255));
 
-  //     rectangle = imageScene->addRect(newCoords.x(), newCoords.y(),
-  //                                     newCoords.width(), newCoords.height(),
-  //                                     redPen,
-  //                                     QBrush(QColor(255, 0, 0, 100)));
-  //     rectangle->setZValue(1);
-  //     rectangle->setVisible(true);
+      rectangle = imageScene->addRect(newCoords.x(), newCoords.y(),
+                                      newCoords.width(), newCoords.height(),
+                                      redPen,
+                                      QBrush(QColor(255, 0, 0, 100)));
+      rectangle->setZValue(1);
+      rectangle->setVisible(true);
 
-  //     vertLineLeft = imageScene->addLine(newCoords.x(), 0,
-  //                                        newCoords.x(), imageScene->height(), redPen);
-  //     vertLineLeft->setZValue(1);
-  //     vertLineLeft->setVisible(true);
+      vertLineLeft = imageScene->addLine(newCoords.x(), 0,
+                                         newCoords.x(), imageScene->height(), redPen);
+      vertLineLeft->setZValue(1);
+      vertLineLeft->setVisible(true);
 
-  //     vertLineRight = imageScene->addLine(newCoords.bottomRight().x(), 0,
-  //                                         newCoords.bottomRight().x(), imageScene->height(), redPen);
-  //     vertLineRight->setZValue(1);
-  //     vertLineRight->setVisible(true);
+      vertLineRight = imageScene->addLine(newCoords.bottomRight().x(), 0,
+                                          newCoords.bottomRight().x(), imageScene->height(), redPen);
+      vertLineRight->setZValue(1);
+      vertLineRight->setVisible(true);
 
-  //     horLineTop = imageScene->addLine(0, newCoords.y(),
-  //                                      imageScene->width(), newCoords.y(), redPen);
-  //     horLineTop->setZValue(1);
-  //     horLineTop->setVisible(true);
+      horLineTop = imageScene->addLine(0, newCoords.y(),
+                                       imageScene->width(), newCoords.y(), redPen);
+      horLineTop->setZValue(1);
+      horLineTop->setVisible(true);
 
-  //     horLineBottom = imageScene->addLine(0, newCoords.bottomRight().y(),
-  //                                         imageScene->width(), newCoords.bottomRight().y(), redPen);
-  //     horLineBottom->setZValue(1);
-  //     horLineBottom->setVisible(true);
+      horLineBottom = imageScene->addLine(0, newCoords.bottomRight().y(),
+                                          imageScene->width(), newCoords.bottomRight().y(), redPen);
+      horLineBottom->setZValue(1);
+      horLineBottom->setVisible(true);
 
-  //     drawnRectangle = true;
-  //   }
-  // } else {
-  //   if (rectangle) {
-  //     // I can not call rectangle->prepareGeometryChange();
-  //     // http://www.qtcentre.org/threads/28749-Qt-4.6-GraphicsView-items-remove-problem
-  //     imageScene->removeItem(rectangle);
-  //     delete rectangle;
+      drawnRectangle = true;
+    }
+  } else {
+    if (rectangle) {
+      // I can not call rectangle->prepareGeometryChange();
+      // http://www.qtcentre.org/threads/28749-Qt-4.6-GraphicsView-items-remove-problem
+      imageScene->removeItem(rectangle);
+      delete rectangle;
 
-  //     imageScene->removeItem(vertLineLeft);
-  //     delete vertLineLeft;
+      imageScene->removeItem(vertLineLeft);
+      delete vertLineLeft;
 
-  //     imageScene->removeItem(vertLineRight);
-  //     delete vertLineRight;
+      imageScene->removeItem(vertLineRight);
+      delete vertLineRight;
 
-  //     imageScene->removeItem(horLineTop);
-  //     delete horLineTop;
+      imageScene->removeItem(horLineTop);
+      delete horLineTop;
 
-  //     imageScene->removeItem(horLineBottom);
-  //     delete horLineBottom;
+      imageScene->removeItem(horLineBottom);
+      delete horLineBottom;
 
-  //     // Workaround
-  //     QRectF isCoords = imageScene->sceneRect();
-  //     imageScene->update(isCoords);
+      // Workaround
+      QRectF isCoords = imageScene->sceneRect();
+      imageScene->update(isCoords);
 
-  //     drawnRectangle = false;
-  //   }
-  // }
-  // emit drawRectangleChoosen();
+      drawnRectangle = false;
+    }
+  }
+  emit drawRectangleChoosen();
 }
 
 QGraphicsRectItem* ChildWidget::modelItemBox(int row) {
@@ -1771,35 +1770,30 @@ void ChildWidget::mousePressEvent(QMouseEvent* event) {
     rubberBand->setGeometry(QRect(rbOrigin, QSize()));
     rubberBand->show();
     grabMouse();
+    multipleSelection = true;
+  } else if (event->modifiers() == Qt::ShiftModifier) {
+    // drawStartPos = event->pos();
+    rbOrigin = imageView->mapFromParent(event->pos());
+    rbOrigin.setX(rbOrigin.x() - offset);
+    rubberBand->setGeometry(QRect(rbOrigin, QSize()));
+    rubberBand->show();
+    grabMouse();
+    drawingRectangle = true;
   } else if (event->modifiers() == Qt::NoModifier) {  // BB click selection
-
-    if(drawingRectangle)
-    {
-      // drawStartPos = event->pos();
-      rbOrigin = imageView->mapFromParent(event->pos());
-      rbOrigin.setX(rbOrigin.x() - offset);
-      rubberBand->setGeometry(QRect(rbOrigin, QSize()));
-      rubberBand->show();
-      grabMouse();
-    }
-    else
-    {
-      for (int row = 0; row < model->rowCount(); ++row) {
-        int left = model->index(row, 1).data().toInt();
-        int bottom = model->index(row, 2).data().toInt();
-        int right = model->index(row, 3).data().toInt();
-        int top = model->index(row, 4).data().toInt();
-        QPointF mouseCoordinates = imageView->mapToScene(event->pos());
-        if ((left <= (mouseCoordinates.x() - zoomedOffset) &&
-             (mouseCoordinates.x() - zoomedOffset) <= right) &&
-            (top <= mouseCoordinates.y()) &&
-            (mouseCoordinates.y() <= bottom)) {
-          table->setCurrentIndex(model->index(row, 0));
-          table->setFocus();
-        }
+    for (int row = 0; row < model->rowCount(); ++row) {
+      int left = model->index(row, 1).data().toInt();
+      int bottom = model->index(row, 2).data().toInt();
+      int right = model->index(row, 3).data().toInt();
+      int top = model->index(row, 4).data().toInt();
+      QPointF mouseCoordinates = imageView->mapToScene(event->pos());
+      if ((left <= (mouseCoordinates.x() - zoomedOffset) &&
+           (mouseCoordinates.x() - zoomedOffset) <= right) &&
+          (top <= mouseCoordinates.y()) &&
+          (mouseCoordinates.y() <= bottom)) {
+        table->setCurrentIndex(model->index(row, 0));
+        table->setFocus();
       }
     }
-
   }  // else (BB selection)
 }
 
@@ -1833,7 +1827,7 @@ void ChildWidget::mouseReleaseEvent(QMouseEvent* event) {
   releaseMouse();
   rubberBand->hide();
 
-  if(drawingRectangle)
+  if(drawingRectangle && !multipleSelection)
   {
 
     if (rubberBand->size().isValid() && (rubberBand->size().width() != 0 &&
@@ -1944,6 +1938,9 @@ void ChildWidget::mouseReleaseEvent(QMouseEvent* event) {
         table->selectionModel()->selectedRows().last(),
         QItemSelectionModel::NoUpdate);
   }
+
+  multipleSelection = false;
+  drawingRectangle = false;
 }
 
 bool ChildWidget::eventFilter(QObject* object, QEvent* event) {

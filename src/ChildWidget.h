@@ -392,6 +392,7 @@ class ChildWidget : public QSplitter {
     bool bIsLineEditChanged;
 
     bool drawingRectangle;
+    bool multipleSelection;
 };
 
 #endif  // SRC_CHILDWIDGET_H_
