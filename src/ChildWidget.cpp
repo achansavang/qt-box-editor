@@ -1834,27 +1834,32 @@ void ChildWidget::mouseReleaseEvent(QMouseEvent* event) {
                                           rubberBand->size().height() != 0)) {
 
       qreal zoomFactor = imageView->transform().m22();
+      qreal imwidth = zoomFactor * imageItem->boundingRect().size().toSize().width();
+      qreal imheight = zoomFactor * imageItem->boundingRect().size().toSize().height();
       int offset = this->sizes().first() + 3;  // 6 is estimated width  of splitter
-      int offset2 = imageWidget->size().width() > imageItem->boundingRect().size().toSize().width() ? (imageWidget->size().width() - imageItem->boundingRect().size().toSize().width()) / 2 : 0;
-      int offsety = imageWidget->size().height() > imageItem->boundingRect().size().toSize().height() ? (imageWidget->size().height() - imageItem->boundingRect().size().toSize().height()) / 2 : 0;
+      int offset2 = imageWidget->size().width() > imwidth ? (imageWidget->size().width() - imwidth) / 2 : 0;
+      int offsety = imageWidget->size().height() > imheight ? (imageWidget->size().height() - imheight) / 2 : 0;
 
       rbOrigin.setX(rbOrigin.x() + offset);
 
-      offset /= zoomFactor;
-      offset2 /= zoomFactor;
-      offsety /= zoomFactor;
-
       QPoint pos = imageView->mapFromParent(event->pos());
+     
+      // coordinates in graphic view
+      pos.setX(pos.x() + imageView->horizontalScrollBar()->value());
+      rbOrigin.setX(rbOrigin.x() + imageView->horizontalScrollBar()->value());
+      pos.setY(pos.y() + imageView->verticalScrollBar()->value());
+      rbOrigin.setY(rbOrigin.y() + imageView->verticalScrollBar()->value());
 
-      pos.setX(pos.x() - offset - offset2);
-      rbOrigin.setX(rbOrigin.x() - offset - offset2);
-      pos.setY(pos.y() - offsety);
-      rbOrigin.setY(rbOrigin.y() - offsety);
-   
-      int left = std::min(pos.x(), rbOrigin.x()) / zoomFactor;
-      int right = std::max(pos.x(), rbOrigin.x()) / zoomFactor;
-      int bottom = std::max(pos.y(), rbOrigin.y()) / zoomFactor;
-      int top = std::min(pos.y(), rbOrigin.y()) / zoomFactor;
+      // coordinates in image
+      pos.setX((pos.x() ) - offset - offset2);
+      rbOrigin.setX((rbOrigin.x()) - offset - offset2);
+      pos.setY((pos.y() / zoomFactor) - offsety);
+      rbOrigin.setY((rbOrigin.y() / zoomFactor) - offsety);
+
+      int left = std::min(pos.x(), rbOrigin.x());
+      int right = std::max(pos.x(), rbOrigin.x());
+      int bottom = std::max(pos.y(), rbOrigin.y());
+      int top = std::min(pos.y(), rbOrigin.y());
 
       int newrow = 0;
       model->insertRow(newrow);
