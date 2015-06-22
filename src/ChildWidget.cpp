@@ -2780,8 +2780,8 @@ void ChildWidget::boxDragChanged() {
 
   int row = index.row();
   model->setData(model->index(row, 1, QModelIndex()), resizer->rect.left());
-  model->setData(model->index(row, 2, QModelIndex()), resizer->rect.bottom());
-  model->setData(model->index(row, 3, QModelIndex()), resizer->rect.right());
+  model->setData(model->index(row, 2, QModelIndex()), resizer->rect.y() + resizer->rect.height());
+  model->setData(model->index(row, 3, QModelIndex()), resizer->rect.x() + resizer->rect.width());
   model->setData(model->index(row, 4, QModelIndex()), resizer->rect.top());
   modelItemBox()->setRect(resizer->rect);
 }
