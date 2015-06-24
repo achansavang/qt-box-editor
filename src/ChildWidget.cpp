@@ -1806,6 +1806,8 @@ void ChildWidget::mousePressEvent(QMouseEvent* event) {
       table->clearSelection(); 
       for (int i = 0; i < indexes.size(); ++i)
         model->index(indexes[i].row(), 9).data().value<QGraphicsRectItem*>()->setVisible(boxesVisible);
+
+      updateSelectionRects();
     }
   }  // else (BB selection)
 }
