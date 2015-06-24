@@ -2381,11 +2381,12 @@ void ChildWidget::deleteSymbol() {
     indexes.pop_back();
   }
 
-  if (model->rowCount() != 0) {
-    int afterRow = my_min(indexes.back().row() - indexes.size() + 1,
-                          model->rowCount() - 1);
-    table->setCurrentIndex(model->index(afterRow, 0));
-  }
+  // if (model->rowCount() != 0) {
+  //   int afterRow = my_min(indexes.back().row() - indexes.size() + 1,
+  //                         model->rowCount() - 1);
+  //   table->setCurrentIndex(model->index(afterRow, 0));
+  // }
+  
   table->setFocus();
   updateSelectionRects();
   documentWasModified();
