@@ -1799,11 +1799,13 @@ void ChildWidget::mousePressEvent(QMouseEvent* event) {
 
     if(!gotSelection)
     { 
-      QModelIndex index = selectionModel->currentIndex();
-      modelItemBox(index.row())->setPen(QPen(boxColor));
+      QModelIndexList indexes = table->selectionModel()->selectedRows();
+      for (int i = 0; i < indexes.size(); ++i)
+        modelItemBox(indexes[i].row())->setPen(QPen(boxColor));
       
       table->clearSelection(); 
-      model->index(index.row(), 9).data().value<QGraphicsRectItem*>()->setVisible(boxesVisible);
+      for (int i = 0; i < indexes.size(); ++i)
+        model->index(indexes[i].row(), 9).data().value<QGraphicsRectItem*>()->setVisible(boxesVisible);
     }
   }  // else (BB selection)
 }
