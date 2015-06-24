@@ -1780,6 +1780,7 @@ void ChildWidget::mousePressEvent(QMouseEvent* event) {
     grabMouse();
     drawingRectangle = true;
   } else if (event->modifiers() == Qt::NoModifier) {  // BB click selection
+    bool gotSelection = false;
     for (int row = 0; row < model->rowCount(); ++row) {
       int left = model->index(row, 1).data().toInt();
       int bottom = model->index(row, 2).data().toInt();
@@ -1792,7 +1793,17 @@ void ChildWidget::mousePressEvent(QMouseEvent* event) {
           (mouseCoordinates.y() <= bottom)) {
         table->setCurrentIndex(model->index(row, 0));
         table->setFocus();
+        gotSelection = true;
       }
+    }
+
+    if(!gotSelection)
+    { 
+      QModelIndex index = selectionModel->currentIndex();
+      modelItemBox(index.row())->setPen(QPen(boxColor));
+      
+      table->clearSelection(); 
+      model->index(index.row(), 9).data().value<QGraphicsRectItem*>()->setVisible(boxesVisible);
     }
   }  // else (BB selection)
 }
